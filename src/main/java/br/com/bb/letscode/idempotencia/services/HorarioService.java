@@ -13,7 +13,7 @@ public class HorarioService {
     }
 
     public String now() {
-        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:MM:ss"));
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
     }
 
 }
