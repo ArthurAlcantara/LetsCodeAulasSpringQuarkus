@@ -1,4 +1,4 @@
-package model;
+package br.com.bb.letscode.idempotencia.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

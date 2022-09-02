@@ -3,6 +3,7 @@ package br.com.bb.letscode.idempotencia.controllers;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -18,22 +19,26 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.bb.letscode.idempotencia.model.Cliente;
+import br.com.bb.letscode.idempotencia.model.ResponseModel;
+import br.com.bb.letscode.idempotencia.service.ClienteService;
+import br.com.bb.letscode.idempotencia.service.impl.ClienteServiceImpl;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.Cliente;
-import model.ResponseModel;
 
 @RestController
 @RequestMapping("cliente")
 @Slf4j
+@RequiredArgsConstructor
 public class ClienteController {
 
-    Map<String, Cliente> repo = new HashMap<String, Cliente>();
+    private final ClienteServiceImpl cliService;
 
     @GetMapping
     public ResponseEntity<ResponseModel<List<Cliente>>> testeGetTodos() {
         log.error("Mostrar Todos Os Clientes");
         ResponseModel<List<Cliente>> rm = new ResponseModel<List<Cliente>>("Sucesso",
-                repo.values().stream().collect(Collectors.toList()));
+                cliService.getClientes());
         return ResponseEntity.status(HttpStatus.OK).body(rm);
     }
 
@@ -43,22 +48,20 @@ public class ClienteController {
     }
 
     @GetMapping("buscar")
-    public ResponseEntity<ResponseModel<Cliente>> testeGetPorIdPath(@RequestParam String id) {
-        log.info(id);
-        if (!repo.containsKey(id)) {
+    public ResponseEntity<ResponseModel<Cliente>> testeGetPorIdPath(@RequestParam Long id) {
+        Cliente cli = cliService.getPorId(id);
+        if (Objects.isNull(cli)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ResponseModel<Cliente>("Cliente não encontrado", null));
         } else {
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(new ResponseModel<Cliente>("Sucesso", repo.get(id)));
+                    .body(new ResponseModel<Cliente>("Sucesso", cli));
         }
     }
 
     @PostMapping("salvar")
     public ResponseEntity<ResponseModel<Cliente>> salvarCliente(@RequestBody Cliente cli) {
-        String id = UUID.randomUUID().toString();
-        cli.setId(id);
-        repo.put(id, cli);
+        cliService.salvarCliente(cli);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ResponseModel<Cliente>("Cliente criado com sucesso: ", cli));
     }
@@ -71,14 +74,18 @@ public class ClienteController {
 
     @PutMapping("atualizar")
     public ResponseEntity<ResponseModel<Cliente>> testePut(@RequestBody Cliente cli) {
-        if (!repo.containsKey(cli.getId())) {
+        if (cli.getId() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ResponseModel<Cliente>("Cliente não encontrado", null));
-        } else {
-            repo.put(cli.getId(), cli);
+                    .body(new ResponseModel<Cliente>("Id é obrigatório", null));
         }
-        return ResponseEntity.status(HttpStatus.OK)
+        try{
+            cliService.salvarCliente(cli);
+            return ResponseEntity.status(HttpStatus.OK)
                 .body(new ResponseModel<Cliente>("Cliente atualizado com sucesso", cli));
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(new ResponseModel<Cliente>("Cliente não encontrado", null));
+        }
     }
 
 }

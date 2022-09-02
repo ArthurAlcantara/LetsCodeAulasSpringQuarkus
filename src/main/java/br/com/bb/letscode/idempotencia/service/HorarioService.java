@@ -1,4 +1,4 @@
-package br.com.bb.letscode.idempotencia.services;
+package br.com.bb.letscode.idempotencia.service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

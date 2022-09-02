@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.bb.letscode.idempotencia.model.ResponseModel;
+import br.com.bb.letscode.idempotencia.service.HorarioService;
 import lombok.extern.slf4j.Slf4j;
-import model.ResponseModel;
-import br.com.bb.letscode.idempotencia.services.HorarioService;
 
 @RestController
 @RequestMapping("hello")
